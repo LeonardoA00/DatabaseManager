@@ -52,17 +52,25 @@ int append_n(database* db, int n, int auto_id)
   int i;
   obj* new;
 
+  load_ids(db);
+
   for(i = 0; i < n; i++)
   {
     new = malloc(sizeof(obj));
     if(new)
     {
       if(auto_id)
-        new->id = i;
+      {
+        new->id = available_id(db);
+        //DEBUG
+        //printf("New ID: %d\n", new->id);
+      }
       else
       {
-        printf("ID: ");
-        scanf("%d", new->id);
+        do {
+          printf("ID: ");
+          scanf("%d", &(new->id));
+        } while(!valid_id(db, new->id));
       }
 
       //Modify here the attributes
@@ -86,6 +94,8 @@ int append_till(database* db, char stopword[], int auto_id)
   obj* new;
   char tmpstr[STR_LEN + 1];
 
+  load_ids(db);
+
   i = 0;
   while(1)
   {
@@ -95,16 +105,24 @@ int append_till(database* db, char stopword[], int auto_id)
       printf("Name: ");
     scanf("%s", tmpstr);
     if(strcmp(tmpstr, stopword) == 0)
-      break;
+      return i;
 
     new = malloc(sizeof(obj));
 
     if(new)
     {
       if(auto_id)
-        new->id = i;
+        new->id = available_id(db);
       else
+      {
         new->id = atoi(tmpstr);
+        while(!valid_id(db, new->id))
+        {
+          printf("ID: ");
+          scanf("%d", new->id);
+        }
+      }
+
 
       //Modify here the attributes
       if(auto_id)
@@ -196,4 +214,84 @@ int db_save(database* db)
   }
 
   return 0;
+}
+
+//IDS MANAGEMENT
+int* taken_ids;
+
+void load_ids(database* db)
+{
+  obj* p;
+  int i;
+
+  taken_ids = malloc(db->n * sizeof(int));
+
+  if(taken_ids)
+    for(p = db->h, i = 0; p != NULL; p = p->next, i++)
+      *(taken_ids + i) = p->id;
+  else
+    printf("load_ids: error allocating memory\n");
+
+
+  //For debug purposes
+  /*printf("taken_ids: ");
+  for(i = 0; i < db->n; i++)
+    printf("%d ", *(taken_ids + i));
+  printf("\n");
+  */
+}
+
+int available_id(database* db)
+{
+  int* taken_ids_new;
+  int id;
+  int i;
+  int found;
+
+  found = 1;
+  for(id = 0; found == 1; id++)
+  {
+    //printf("Checking: %d\n", id);
+    found = 0;
+    for(i = 0; i < db->n && found == 0; i++)
+    {
+      //printf("  comp: %d\n", *(taken_ids + i));
+      if(id == *(taken_ids + i))
+        found = 1;
+    }
+  }
+  id--;
+
+  //printf("ID_found = %d\n", id);
+
+  taken_ids_new = malloc((db->n + 1) * sizeof(int));
+  if(taken_ids_new)
+  {
+    for(i = 0; i < db->n; i++)
+      *(taken_ids_new + i) = *(taken_ids + i);
+    *(taken_ids_new + i) = id;
+
+    free(taken_ids);
+    taken_ids = taken_ids_new;
+
+  }
+  else
+    printf("available_id: error allocating memory\n");
+
+  return id;
+}
+
+int valid_id(database* db, int id)
+{
+  int valid;
+  int i;
+
+  load_ids(db);
+  
+  valid = 1;
+  for(i = 0; i < db->n && valid; i++)
+    if(id == *(taken_ids + i))
+      valid = 0;
+
+  return valid;
 }
