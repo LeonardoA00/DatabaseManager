@@ -46,7 +46,6 @@ void push(database* db, obj* new)
   db->n = db->n + 1;
 }
 
-//TODO SIstemare gestione id
 int append_n(database* db, int n, int auto_id)
 {
   int i;
@@ -60,11 +59,7 @@ int append_n(database* db, int n, int auto_id)
     if(new)
     {
       if(auto_id)
-      {
         new->id = available_id(db);
-        //DEBUG
-        //printf("New ID: %d\n", new->id);
-      }
       else
       {
         do {
@@ -119,7 +114,7 @@ int append_till(database* db, char stopword[], int auto_id)
         while(!valid_id(db, new->id))
         {
           printf("ID: ");
-          scanf("%d", new->id);
+          scanf("%d", &(new->id));
         }
       }
 
@@ -232,13 +227,6 @@ void load_ids(database* db)
   else
     printf("load_ids: error allocating memory\n");
 
-
-  //For debug purposes
-  /*printf("taken_ids: ");
-  for(i = 0; i < db->n; i++)
-    printf("%d ", *(taken_ids + i));
-  printf("\n");
-  */
 }
 
 int available_id(database* db)
@@ -251,18 +239,12 @@ int available_id(database* db)
   found = 1;
   for(id = 0; found == 1; id++)
   {
-    //printf("Checking: %d\n", id);
     found = 0;
     for(i = 0; i < db->n && found == 0; i++)
-    {
-      //printf("  comp: %d\n", *(taken_ids + i));
       if(id == *(taken_ids + i))
         found = 1;
-    }
   }
   id--;
-
-  //printf("ID_found = %d\n", id);
 
   taken_ids_new = malloc((db->n + 1) * sizeof(int));
   if(taken_ids_new)
@@ -287,7 +269,7 @@ int valid_id(database* db, int id)
   int i;
 
   load_ids(db);
-  
+
   valid = 1;
   for(i = 0; i < db->n && valid; i++)
     if(id == *(taken_ids + i))
