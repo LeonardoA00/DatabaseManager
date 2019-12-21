@@ -61,7 +61,7 @@ void help()
   printf("------------------\n");
   printf(" DB_MANAGER\n");
   printf("          Made by\n");
-  printf(" Leonardo Airoldi");
+  printf(" Leonardo Airoldi\n");
   printf("------------------\n\n");
 
   printf("LIST OF COMMANDS\n");

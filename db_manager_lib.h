@@ -21,6 +21,7 @@ typedef struct database_s {
   obj* h;
 } database;
 
+extern int* taken_ids;
 //Print all the database
 extern void printdb(database* db);
 //Append a given object at the end of the database
@@ -39,5 +40,12 @@ extern database db_open(char path[]);
 extern int db_save(database* db);
 
 //void increasing(database* db);
+
+//Load all the ids used in the database. This function is used to know in pair with available_id for the management of auto_id process
+extern void load_ids(database* db);
+//Return the first available id that can be used while adding a new element in the databse. Refresh the list of taken_ids with the one used too
+extern int available_id(database* db);
+//Return 1 if a ID is unique within a databasw
+extern int valid_id(database* db, int id);
 
 #endif
